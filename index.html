@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BB Driv – Ut på tur 2026</title>
+
+https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap
+
+<style>
+
+/* GLOBALT */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Bakgrunnsbilde */
+body {
+    background: url('images/bg.jpg') center/cover no-repeat fixed;
+}
+
+/* Overlay */
+.backdrop {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Hovedkort */
+.container {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(20,20,25,0.78);
+    padding: 35px 28px;
+    border-radius: 22px;
+    box-shadow: 0px 8px 40px rgba(0,0,0,0.55);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+/* Logo */
+.logo {
+    width: 95px;
+    display: block;
+    margin: 0 auto 15px auto;
+}
+
+/* Header */
+h1 {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 300;
+    font-size: 15px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+/* Labels og input */
+label {
+    font-weight: 600;
+    display: block;
+    margin-top: 18px;
+    font-size: 14px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    margin-top: 7px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+input::placeholder {
+    color: #ccc;
+}
+
+input:focus,
+select:focus {
+    outline: 2px solid #222d64;
+    background: rgba(255,255,255,0.12);
+}
+
+select option {
+    background-color: #f2f2f2;
+    color: #222;
+}
+
+select option:hover {
+    background-color: #e0e0e0;
+    color: #2427da;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* Knapp */
+button {
+    margin-top: 30px;
+    width: 100%;
+    padding: 15px;
+    background: #de2726;
+    border: none;
+    color: white;
+    font-size: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 6px 20px rgba(255,120,60,0.4);
+}
+
+/* Status */
+#status {
+    margin-top: 18px;
+    font-weight: 600;
+    text-align: center;
+    min-height: 20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="backdrop">
+<div class="container">
+
+images/bb-logo.png class="logo">
+
+<h1>BB Driv – Ut på tur</h1>
+
+<p class="intro">
+Registrer turene dine her og samle lodd i trekningen.<br><br>
+Hver tur gir 1 lodd.<br>
+Du kan få ekstralodd for turer over 2 timer, over 500 høydemeter,
+deling av bilde/video og turer sammen med kollegaer.
+</p>
+
+<form id="turForm">
+
+<label>Fullt navn (du kan registrere flere personer samtidig):</label>
+<input
+    type="text"
+    id="navn"
+    placeholder="F.eks. Ola Nordmann, Kari Nordmann"
+    required
+>
+
+<label>Dato:</label>
+<input type="date" id="dato" required>
+
+<label>Kort beskrivelse av turen:</label>
+<input
+    type="text"
+    id="turbeskrivelse"
+    placeholder="F.eks. Rundtur rundt Folkeparken"
+    required
+>
+
+<label>Gått sammen med kollegaer?</label>
+<select id="kollega">
+    <option value="nei">Nei</option>
+    <option value="ja">Ja</option>
+</select>
+
+<label>Var turen over 2 timer?</label>
+<select id="toTimer">
+    <option value="nei">Nei</option>
+    <option value="ja">Ja</option>
+</select>
+
+<label>Var turen over 500 høydemeter?</label>
+<select id="hoydemeter">
+    <option value="nei">Nei</option>
+    <option value="ja">Ja</option>
+</select>
+
+<label>Last opp bilder/videoer:</label>
+<input
+    type="file"
+    id="fil"
+    accept="image/*,video/*"
+    multiple
+>
+
+<button type="submit">SEND INN</button>
+
+</form>
+
+<p id="status"></p>
+
+</div>
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbyC4ojtb_K0dsXZ07RA4_yeECVwJm1jO0j6hpjp3juronw2ldjf0uUEEcCNi9Oe0yU2eg/exec";
+
+/* Konverter fil til Base64 */
+function toBase64(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+    });
+}
+
+document.getElementById("turForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const status = document.getElementById("status");
+    status.textContent = "Sender inn...";
+
+    try {
+
+        const files = document.getElementById("fil").files;
+        let fileArray = [];
+
+        if (files.length > 0) {
+
+            for (let f of files) {
+
+                const base64 = await toBase64(f);
+
+                fileArray.push({
+                    name: f.name,
+                    type: f.type,
+                    data: base64.split(",")[1]
+                });
+            }
+        }
+
+        const payload = {
+            fulltnavn: document.getElementById("navn").value,
+            dato: document.getElementById("dato").value,
+            turbeskrivelse: document.getElementById("turbeskrivelse").value,
+            kollega: document.getElementById("kollega").value === "ja",
+            totimer: document.getElementById("toTimer").value === "ja",
+            hoydemeter500: document.getElementById("hoydemeter").value === "ja",
+            file: fileArray
+        };
+
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+            status.textContent = "Turen er registrert ✔";
+            document.getElementById("turForm").reset();
+        }
+        else {
+            status.textContent = "Feil: " + data.error;
+        }
+
+    } catch (err) {
+        console.error(err);
+        status.textContent = "Noe gikk galt ved innsending.";
+    }
+});
+
+</script>
+
+</body>
+</html>
